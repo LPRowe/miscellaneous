@@ -1,12 +1,11 @@
 import random
+import matplotlib
 import matplotlib.pyplot as plt
 import math
 import functools
 import heapq
 import collections
 import time
-import multiprocessing
-import concurrent.futures
 
 def timer(fcn):
     def wrapper(*args, **kwargs):
@@ -55,16 +54,17 @@ class UnionFind:
         self.group_id += 1
 
 def generate_points(n, bound):
-    x = [random.randint(0, bound) for _ in range(n)]
-    y = [random.randint(0, bound) for _ in range(n)]
-    return list(set(list(zip(x,y))))
+    points = set()
+    while len(points) < n:
+        points.add((bound * random.random(), bound * random.random()))
+    return list(points)
 
 def distance(start, fin):
     x1, y1 = start
     x2, y2 = fin
     return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-@timer
+#@timer
 def optimal_path_dp(points):
     
     @functools.lru_cache(None)
@@ -119,6 +119,67 @@ def optimal_path(points):
         helper(0, [p], points[:i]+points[i+1:])
     return best, best_path
 
+def path_cost(points):
+    return sum(distance(a, b) for a, b in zip(points, points[1:]))
+
+def path_relaxation(points, k = 1):
+    """
+    points: the tour suggested by heuristic_path 
+    k: the number of points to be relaxed per cycle (recommended 1 or 2)
+    
+    note: points[0] = points[-1] = the starting city, never move points[0] or points[-1]
+    
+    When k is one, tries removing one node from the path and tries to insert it between all other
+    cities.  The location that results in the smallest total path is chosen.
+    This process is repeated for all n nodes. (consider prioritizing the order of checking nodes)
+    i.e. do most streched node first
+    
+    When k is two, the same process as above is followed using 2 random nodes.
+    first: check all locations individually for the two nodes
+    second: check all locations with the two nodes side by side (a, b) and then (b, a)
+    Place the two nodes in the location(s) that minimizes the tour length
+    """
+    def reduced_cost(i):
+        """returns the change in path length when point i is removed from the path"""
+        a, b, c = points[i-1], points[i], points[i+1]
+        return distance(a, c) - distance(a, b) - distance(b, c)
+    
+    def insertion_cost(a, b, c):
+        """returns the cost of inserting point b in between points a and c"""
+        return distance(a, b) + distance(b, c) - distance(a, c)
+    
+    initial_cost = path_cost(points)
+    
+    if k == 1:
+        adjusted = set() # keep track of which points have already been adjusted
+        while len(adjusted) < len(points) - 2:
+            for i in range(1, len(points)-1):
+                if points[i] not in adjusted:
+                    adjusted.add(points[i])
+                    rc = reduced_cost(i)   # change in cost by removing point i
+                    best = 0
+                    best_index = i
+                    for j in range(len(points)-1):
+                        if j != i and j != i - 1:
+                            c = insertion_cost(points[j], points[i], points[j+1]) # increase in cost by adding point i
+                            total_cost = c + rc
+                            if total_cost < best:
+                                best = total_cost
+                                best_index = j
+                                
+                    if best < 0 and best_index != i:
+                        j = best_index
+                        p = [points[i]]
+                        if j < i:
+                            points = points[:j+1] + p + points[j+1:i] + points[i+1:]
+                        else:
+                            points = points[:i] + points[i+1:j+1] + p + points[j+1:]
+
+    final_cost = path_cost(points)
+    
+    print(round(initial_cost, 1), round(final_cost, 1), round(final_cost - initial_cost, 1))
+    return final_cost, points
+
 @timer
 def heuristic_path(points):
     """
@@ -160,7 +221,7 @@ def heuristic_path(points):
     best_path = []
     best = math.inf
     for start in points:
-        visited = set()
+        visited = set([start])
         path = []
         cost = 0
         helper(start)
@@ -174,28 +235,30 @@ def heuristic_path(points):
     
     
 def plot_path(points, color, style = '-', connect_the_dots = True, fig_num = 1, line_width = 1):
-    plt.figure(fig_num)
+    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 150)
     x, y = list(zip(*points))
-    plt.scatter(x, y, color = color)
+    plt.scatter(x, y, color = color, s = 4)
     if connect_the_dots:
         plt.plot(x, y, color+style, lw = line_width)
     plt.show()
     
-def plot_edges(edges, color, style = '--', fig_num = 1, line_width = 1):
-    plt.figure(fig_num)
+def plot_edges(edges, color, style = '--', fig_num = 2, line_width = 1):
+    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 150)
     for a, b in edges:
         plt.scatter([a[0], b[0]], [a[1], b[1]], color = color, s = 4)
         plt.plot([a[0], b[0]], [a[1], b[1]], color + style, lw = line_width)
     plt.show()
     
-def average_error(func1, func2, n = 18, cycles = 10):
+def average_error(func1, func2, n = 12, cycles = 10):
     best = 0
     heur = 0
     for _ in range(cycles):
-        points = generate_points(n, 10)
+        points = generate_points(n, 100)
         best += func1(points)[0]
         heur += func2(points)[1]
-    print(best, heur, round(100*(heur - best) / best, 1))
+    print(round(best, 1), round(heur, 1), round(100*(heur - best) / best, 1))
+    
+
 
 if __name__ == "__main__":
     """
@@ -209,32 +272,36 @@ if __name__ == "__main__":
     Here we will solve the TSP optimally and using a heuristic, compare the
     time complexity of each solution and the amount of error.
     """
-    show_optimal_path = False
-    show_mst = False
-    show_heur_path = False
+    matplotlib.rc('font', size = 7)
+    compare = True
     
-    toggle = False
-    if toggle:
-        show_optimal_path ^= 1
-        show_mst ^= 1
-        show_heur_path ^= 1
-    
-    n = 15
-    points = generate_points(15, 10)
+    n = 18
+    points = generate_points(n, 100)
     
     plt.close('all')
-    if show_optimal_path:
+    if compare:
         cost, best_path = optimal_path_dp(points)
-        plot_path(best_path, 'g')
-    
-    if show_heur_path | show_mst:
         edges, heur_cost, heur_best_path = heuristic_path(points)
-        if show_heur_path:
-            plot_path(heur_best_path, 'r', style = '--')
-        if show_mst:
-            plot_edges(edges, 'b', style = '-.')
+        rel_cost, relaxed_path = path_relaxation(heur_best_path)
+        prev = heur_cost
+        while rel_cost != prev:
+            prev = rel_cost
+            rel_cost, relaxed_path = path_relaxation(relaxed_path)
+        plot_path(best_path, 'g')
+        plot_path(heur_best_path, 'r', style = '--')
         error = 100 * (heur_cost - cost) / cost
         plt.title(f"Optimal: {round(cost, 1)} Approx.: {round(heur_cost, 1)} Error: {round(error, 1)}%")
+        plt.legend(["Optimal Path", "Approximate Path"])
         
-            
-    p = average_error(optimal_path_dp, heuristic_path)
+        plot_edges(edges, 'b', style = '-.')
+        plt.title("Minimum Spanning Tree")
+        
+        plot_path(heur_best_path, 'r', fig_num = 3)
+        plot_path(relaxed_path, 'b', style = '-', fig_num = 3)
+    
+    print(round(heur_cost, 1), round(rel_cost, 1), round(cost, 1))
+    #average_error(optimal_path_dp, heuristic_path, n = n, cycles = 10)
+        
+        
+        
+        
