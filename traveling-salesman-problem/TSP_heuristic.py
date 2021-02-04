@@ -177,10 +177,10 @@ def path_relaxation(points, k = 1):
 
     final_cost = path_cost(points)
     
-    print(round(initial_cost, 1), round(final_cost, 1), round(final_cost - initial_cost, 1))
+    #print(round(initial_cost, 1), round(final_cost, 1), round(final_cost - initial_cost, 1))
     return final_cost, points
 
-@timer
+#@timer
 def heuristic_path(points):
     """
     Uses Kruskal's algorithm to create a MST of the points
@@ -232,6 +232,22 @@ def heuristic_path(points):
             best_path = path
     
     return edges, best, best_path
+
+def relaxed_heur_path(points):
+    """
+    Calculates the heuristic path using Kruskal's Algorithm for MST and pre-order traversals
+    Then relaxes the path by removing and reinserting points at more optimal locations in the path
+    to remove tension from the path
+    
+    Returns edges of the MST, cost of the relaxed path, and the relaxed path
+    """
+    edges, heur_cost, heur_best_path = heuristic_path(points)
+    rel_cost, relaxed_path = path_relaxation(heur_best_path)
+    prev = heur_cost
+    while rel_cost != prev:
+        prev = rel_cost
+        rel_cost, relaxed_path = path_relaxation(relaxed_path)
+    return edges, rel_cost, relaxed_path
     
     
 def plot_path(points, color, style = '-', connect_the_dots = True, fig_num = 1, line_width = 1):
@@ -252,14 +268,13 @@ def plot_edges(edges, color, style = '--', fig_num = 2, line_width = 1):
 def average_error(func1, func2, n = 12, cycles = 10):
     best = 0
     heur = 0
-    for _ in range(cycles):
+    for i in range(cycles):
+        print(i, '/', cycles)
         points = generate_points(n, 100)
         best += func1(points)[0]
         heur += func2(points)[1]
-    print(round(best, 1), round(heur, 1), round(100*(heur - best) / best, 1))
+    print(round(best, 1), round(heur, 1), round(100*(heur - best) / best, 2))
     
-
-
 if __name__ == "__main__":
     """
     The traveling salesman problem (TSP) requires a salesman to visit
@@ -273,7 +288,7 @@ if __name__ == "__main__":
     time complexity of each solution and the amount of error.
     """
     matplotlib.rc('font', size = 7)
-    compare = True
+    compare = False
     
     n = 18
     points = generate_points(n, 100)
@@ -299,8 +314,11 @@ if __name__ == "__main__":
         plot_path(heur_best_path, 'r', fig_num = 3)
         plot_path(relaxed_path, 'b', style = '-', fig_num = 3)
     
-    print(round(heur_cost, 1), round(rel_cost, 1), round(cost, 1))
-    #average_error(optimal_path_dp, heuristic_path, n = n, cycles = 10)
+    # 18, 21 for 50 each to go 
+    for n in range(20, 21):
+        print(n)
+        average_error(optimal_path_dp, relaxed_heur_path, n = n, cycles = 10)
+        print()
         
         
         

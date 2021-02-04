@@ -118,17 +118,17 @@ Let's compare a few of the optimal and approximate tour pairs to get an idea of 
 ### Observations:
 
 1. When there are fewer nodes, the heuristic approach will often find the optimal path
-2. Often, the error arrises from the path taking a detour to go through a point that would obviously fit better elsewhere in the path
+2. Often, the error originates due to the path taking a detour through a point that would obviously fit better elsewhere in the path
 
 ### Idea:
 
-Think of the path like a rubber band.  If we take out a point, the path will fill the gap by connecting the points 2 neighbors.
+Think of the path like a rubber band.  If we take out a point, the path will fill the gap by connecting the 2 neighboring points 2.
 
 In doing so, the rubber band will relax a little because it is not being stretched as far.
 
 However, we need to visit all the points so we must re-insert the point between two of the existing nodes in the path.
 
-But, perhaps there is a better place in the path for this point.  
+But, perhaps there is a better place in the path for this point than where we removed it from.  
 
 Look at the approximate path for the 14 node plot.  Now picture removing the node at (42, 22) from the plot. The rubber band would relax by connecting nodes (60, 5) and (50, 35).  Insert the point (42, 22) back into the path, which two nodes should it go between?  The two nodes that will stretch the rubber band the least.  In this case (25, 21) and (50, 35).  
 
@@ -153,3 +153,15 @@ insertion cost will be non-negative because we are stretching the band to insert
 
 ### Comparisons
 
+| n | (heuristic - optimal) / optimal | | n | (heuristic - optimal) / optimal |
+|:----:|:---:|:---:|:---:|:---:|
+| 3  | 0.00% | | 12  | 1.25% |
+| 4  | 0.00% | | 13  | 1.36% |
+| 5  | 0.00%  | | 14  | 2.18% |
+| 6  | 0.07%  | | 15  | 2.80% |
+| 7  | 0.11%  | | 16  | 3.12% |
+| 8  | 0.31%  | | 17  | 3.18% |
+| 9  | 0.40%  | | 18  | 4.22% |
+| 10  | 0.71%  | | 19 | 4.52% |
+| 11  | 1.19%  | | 20 | 4.48% |
+<i>*{20} calculated from 50 samples, {3 - 19} calculated from 100 - 1000 samples.</i>
