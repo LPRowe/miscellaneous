@@ -1,3 +1,19 @@
+### Usage
+
+[ ] List of functions, time complexities, accuracy<br>
+[ ] Note on generalization to non-geometric problems that follow the triangulation inequality by updating the distance function
+
+<p align="center">
+<img src="./images/heur-rel-sub/20h5.png" width="32%">
+<img src="./images/heur-rel-sub/20r5.png" width="32%">
+<img src="./images/heur-rel-sub/20s5.png" width="32%">
+<figcaption>Green Path: O(n<sup>2</sup> 2<sup>n</sup>) Optimum solution to the traveling salesman problem (TSP)<br>
+Left: O(n<sup>2</sup>) Approximate solution via minimum spanning tree (MST) and preorder traversal<br>
+Middle: O(n<sup>2</sup>) Improved version of left through path relaxation<br> 
+Right: O(n k<sup>2</sup> 2<sup>k</sup>) Improved version of middle through k-optimization</figcaption>
+</p>
+
+
 ### Intro
 
 The traveling salesman problem (TSP) is a classic NP-complete problem.
