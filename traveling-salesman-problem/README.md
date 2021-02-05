@@ -81,6 +81,7 @@ However, the increase in speed comes at the cost of accuracy.  The relative accu
 | 9  | 4.3%  | | 18  | 13.1% |
 | 10  | 5.4%  | | 19 | 13.6% |
 | 11  | 6.2%  | | 20 | 14.0% |
+
 <i>*{18, 19, 20} calculated from 20 samples, {3 - 17} calculated from 100 - 1000 samples.</i>
 
 ### Thoughts:
@@ -164,6 +165,7 @@ insertion cost will be non-negative because we are stretching the band to insert
 | 9  | 0.40%  | | 18  | 4.22% |
 | 10  | 0.71%  | | 19 | 4.52% |
 | 11  | 1.19%  | | 20 | 4.48% |
+
 <i>*{20} calculated from 50 samples, {3 - 19} calculated from 100 - 1000 samples.</i>
 
 ### Optimal versus Approximate Tours:
@@ -249,6 +251,7 @@ Furthermore because in general we will not know where the heuristic solution dev
 | 9  | 0.070%  | | 18  | 0.225% |
 | 10  | 0.083%  | | 19 | 0.856% |
 | 11  | 0.200%  | | 20 | 0.458% |
+
 <b><i>*{19, 20} calcualted from 50 samples, {3-18} calculated from 100 - 1000 samples.</i><br>
 Note: percent error does not necessarily reflect how close the heuristic path is to the optimal path.  In this case the heuristic path typically has 0% error however when the path is not perfect, the error is slightly less than the errors reported in the previous table on average.</b>
 
