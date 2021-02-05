@@ -8,7 +8,7 @@ Think of the problem in terms of vertices (cities) that are fully connected by a
 
 ### Methods
 
-####<b>The brute force approach:</b>
+#### <b>The brute force approach:</b>
 1. generate all permuations of N cities
 2. calculate the cost of the path created by each permuation
 Here, the cost to travel from city A to city B is the distance between cities A and B.
@@ -18,7 +18,7 @@ which works... but scales with O(n!) which makes this approach infeasible for se
 
 The time and space complexity of the solution can be greatly improved through dynamic programming.
 
-####<b>The dynamic programming approach:</b>
+#### <b>The dynamic programming approach:</b>
 1. Choose a specific starting city.
 We must travel to every city once, so it does not matter which city you choose.
 2. Store the visited cities in a bit-masked integer.
@@ -45,7 +45,7 @@ This is a substantial improvement, which allows us to calculate the optimal solu
 At this point, you might be thinking 20 cities is not a lot of cities, and you are right.
 However, in order to further improve the time complexity of our solution, we must forego accuracy.
 
-####<b>The heuristic approach:</b>
+#### <b>The heuristic approach:</b>
 
 1. Calculate the minimum spanning tree (MST) of the set of cities.
 This can be done with Prim's Algorithm or Kruskal's Algorithm.
