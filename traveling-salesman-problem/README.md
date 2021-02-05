@@ -98,21 +98,21 @@ Let's compare a few of the optimal and approximate tour pairs to get an idea of 
 ### Optimal versus Approximate Tours:
 
 <p align="center"><b>10 Nodes</b><br>
-<img src="10_nodes_.png" width="40%">
-<img src="10_nodes.png" width="40%">
+<img src="./images/10_nodes_.png" width="40%">
+<img src="./images/10_nodes.png" width="40%">
 </p>
 
 <p align="center"><b>14 Nodes</b><br>
-<img src="14_nodes_.png" width="40%">
-<img src="14_nodes.png" width="40%">
+<img src="./images/14_nodes_.png" width="40%">
+<img src="./images/14_nodes.png" width="40%">
 </p>
 
 <p align="center"><b>18 Nodes</b><br>
-<img src="1.png" width="40%">
-<img src="1e.png" width="40%">
+<img src="./images/1.png" width="40%">
+<img src="./images/1e.png" width="40%">
 
-<img src="4.png" width="40%">
-<img src="4e.png" width="40%">
+<img src="./images/4.png" width="40%">
+<img src="./images/4e.png" width="40%">
 </p>
 
 ### Observations:
@@ -170,19 +170,19 @@ insertion cost will be non-negative because we are stretching the band to insert
 <b>Before Relaxatoin (left) and After Relaxation (right)</b>
 
 <p align="center"><b>18 Nodes</b><br>
-<img src="18_pt_heur_path.png" width="40%">
-<img src="18_pt_relaxed.png" width="40%">
+<img src="./images/18_pt_heur_path.png" width="40%">
+<img src="./images/18_pt_relaxed.png" width="40%">
 </p>
 
 
 <p align="center"><b>20 Nodes</b><br>
-<img src="20_pt_heur_path.png" width="40%">
-<img src="20_pt_relaxed.png" width="40%">
+<img src="./images/20_pt_heur_path.png" width="40%">
+<img src="./images/20_pt_relaxed.png" width="40%">
 </p>
 
 <p align="center"><b>20 Nodes</b><br>
-<img src="20_pt_heur_path2.png" width="40%">
-<img src="20_pt_relaxed2.png" width="40%">
+<img src="./images/20_pt_heur_path2.png" width="40%">
+<img src="./images/20_pt_relaxed2.png" width="40%">
 </p>
 
 This method is looking great compared to the previous heuristic!<br>
@@ -206,28 +206,28 @@ Furthermore this would need to be applied n times along the path of nodes result
 <b>k is the subset size that was optimized.</b>
 
 <p align="center"><b>20 Nodes ; k = 5</b><br>
-<img src="./heur-rel-sub/204hn5.png" width="32%">
-<img src="./heur-rel-sub/204rn5.png" width="32%">
-<img src="./heur-rel-sub/204sn5.png" width="32%">
+<img src="./images/heur-rel-sub/204hn5.png" width="32%">
+<img src="./images/heur-rel-sub/204rn5.png" width="32%">
+<img src="./images/heur-rel-sub/204sn5.png" width="32%">
 </p>
 
 
 <p align="center"><b>20 Nodes ; k = 8</b><br>
-<img src="./heur-rel-sub/20h1.png" width="32%">
-<img src="./heur-rel-sub/20r1.png" width="32%">
-<img src="./heur-rel-sub/20s1.png" width="32%">
+<img src="./images/heur-rel-sub/20h1.png" width="32%">
+<img src="./images/heur-rel-sub/20r1.png" width="32%">
+<img src="./images/heur-rel-sub/20s1.png" width="32%">
 </p>
 
 <p align="center"><b>20 Nodes ; k = 10</b><br>
-<img src="./heur-rel-sub/20h2.png" width="32%">
-<img src="./heur-rel-sub/20r2.png" width="32%">
-<img src="./heur-rel-sub/20s2.png" width="32%">
+<img src="./images/heur-rel-sub/20h2.png" width="32%">
+<img src="./images/heur-rel-sub/20r2.png" width="32%">
+<img src="./images/heur-rel-sub/20s2.png" width="32%">
 </p>
 
 <p align="center"><b>20 Nodes ; k = 10</b><br>
-<img src="./heur-rel-sub/203h.png" width="32%">
-<img src="./heur-rel-sub/203r.png" width="32%">
-<img src="./heur-rel-sub/203s.png" width="32%">
+<img src="./images/heur-rel-sub/203h.png" width="32%">
+<img src="./images/heur-rel-sub/203r.png" width="32%">
+<img src="./images/heur-rel-sub/203s.png" width="32%">
 </p>
 
 ### Comparisons
