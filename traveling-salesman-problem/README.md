@@ -165,3 +165,99 @@ insertion cost will be non-negative because we are stretching the band to insert
 | 10  | 0.71%  | | 19 | 4.52% |
 | 11  | 1.19%  | | 20 | 4.48% |
 <i>*{20} calculated from 50 samples, {3 - 19} calculated from 100 - 1000 samples.</i>
+
+### Optimal versus Approximate Tours:
+<b>Before Relaxatoin (left) and After Relaxation (right)</b>
+
+<p align="center"><b>18 Nodes</b><br>
+<img src="18_pt_heur_path.png" width="40%">
+<img src="18_pt_relaxed.png" width="40%">
+</p>
+
+
+<p align="center"><b>20 Nodes</b><br>
+<img src="20_pt_heur_path.png" width="40%">
+<img src="20_pt_relaxed.png" width="40%">
+</p>
+
+<p align="center"><b>20 Nodes</b><br>
+<img src="20_pt_heur_path2.png" width="40%">
+<img src="20_pt_relaxed2.png" width="40%">
+</p>
+
+This method is looking great compared to the previous heuristic!<br>
+But is there more that we can do?
+
+### Observations:
+
+We can learn more by studying where path relaxation failed to produce the optimal solution than we can from studying where it worked perfectly.
+
+Firstly, let's consider what we could do to improve the solution in the 20 node scenario.  Specifically let us consider the first set of 20 nodes.
+
+The optimal solution and relaxed heuristic solution agree on the best path everywhere except for the 8 nodes between (35, 99) and (95, 83).
+
+Since this is a small subset of the total set of nodes, we could apply the dynamic programming solution to find the best path from node (35, 99) to node (5, 83) keeping the two nodes pinned with respect to the remainder of the nodes.  This would require O(k<sup>2</sup>&middot;2<sup>k</sup>) time where k is the length of the gap between nodes.
+
+Furthermore this would need to be applied n times along the path of nodes resulting in O(n&middot;k<sup>2</sup>&middot;2<sup>k</sup>) time complexity.  Which for small k should still be much faster than the dynamic programming approach for the optimal solution.  
+
+### Visual result of subset optimization:
+
+<b>Before relaxation (left), After relaxation (middle), After subset optimization (right)</b><br>
+<b>k is the subset size that was optimized.</b>
+
+<p align="center"><b>20 Nodes ; k = 5</b><br>
+<img src="./heur-rel-sub/204hn5.png" width="32%">
+<img src="./heur-rel-sub/204rn5.png" width="32%">
+<img src="./heur-rel-sub/204sn5.png" width="32%">
+</p>
+
+
+<p align="center"><b>20 Nodes ; k = 8</b><br>
+<img src="./heur-rel-sub/20h1.png" width="32%">
+<img src="./heur-rel-sub/20r1.png" width="32%">
+<img src="./heur-rel-sub/20s1.png" width="32%">
+</p>
+
+<p align="center"><b>20 Nodes ; k = 10</b><br>
+<img src="./heur-rel-sub/20h2.png" width="32%">
+<img src="./heur-rel-sub/20r2.png" width="32%">
+<img src="./heur-rel-sub/20s2.png" width="32%">
+</p>
+
+<p align="center"><b>20 Nodes ; k = 10</b><br>
+<img src="./heur-rel-sub/203h.png" width="32%">
+<img src="./heur-rel-sub/203r.png" width="32%">
+<img src="./heur-rel-sub/203s.png" width="32%">
+</p>
+
+### Comparisons
+
+<b>Approximate path is found through:</b>
+1. Generate MST
+2. Best (lowest cost) pre-order traversal of MST
+3. Relax points one by one
+4. Replace continuous subsets of k nodes with the optimal arrangement where k is floor(n / 2).
+
+| n | (heuristic - optimal) / optimal | | n | (heuristic - optimal) / optimal |
+|:----:|:---:|:---:|:---:|:---:|
+| 3  | 0.000% | | 12  | 0.200% |
+| 4  | 0.000% | | 13  | 0.352% |
+| 5  | 0.012%  | | 14  | 0.232% |
+| 6  | 0.002%  | | 15  | 0.423% |
+| 7  | 0.029%  | | 16  | 0.620% |
+| 8  | 0.017%  | | 17  | 0.454% |
+| 9  | 0.070%  | | 18  | 0.225% |
+| 10  | 0.083%  | | 19 | 0.856% |
+| 11  | 0.200%  | | 20 | 0.458% |
+<b><i>*{19, 20} calcualted from 50 samples, {3-18} calculated from 100 - 1000 samples.</i><br>
+Note: percent error does not necessarily reflect how close the heuristic path is to the optimal path.  In this case the heuristic path typically has 0% error however when the path is not perfect, the error is slightly less than the errors reported in the previous table on average.</b>
+
+| method | time complexity | wall time for 20 cities | typical percentage over optimal path length |
+|:---:|:---:|:---:|:---:|
+|Brute Force| O(n!)| TLE | 0% |
+|Dynamic Programming |O(n<sup>2</sup> 2<sup>n</sup>)| &approx; 31 sec | 0% |
+|Heuristic Approach | O(n<sup>2</sup>) | &approx; 1 ms | 15%
+|Heuristic Approach with Relaxation | O(n<sup>2</sup>) | &approx; 3 ms | 5% |
+|Heuristic Approach with Relaxation and k-subset Optimization | O(n k<sup>2</sup> 2<sup>k</sup>) | &approx; 500 ms | 0%|
+<i>\*Typical error is based on a set size of 20 vertices.</i><br>
+<i>\*k is set to floor(n / 2) for the k-subset optimization</i>
