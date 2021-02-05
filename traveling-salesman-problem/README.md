@@ -19,38 +19,38 @@ which works... but scales with O(n!) which makes this approach infeasible for se
 The time and space complexity of the solution can be greatly improved through dynamic programming.
 
 #### <b>The dynamic programming approach:</b>
-1. Choose a specific starting city.
+1. Choose a specific starting city.<br>
 We must travel to every city once, so it does not matter which city you choose.
-2. Store the visited cities in a bit-masked integer.
+2. Store the visited cities in a bit-masked integer.<br>
 i.e. 106 = '0b1101010' means we have visited cities 1, 3, 5, and 6 (counting the '1' bits from the right)
-3. At each iteration, consider visiting all N cities next.
-If a city has already been visited (as shown in the bit-mask) then do not visit it a second time.
+3. At each iteration, consider visiting all N cities next.<br>
+If a city has already been visited (as shown in the bit-mask) then do not visit it a second time.<br>
 Otherwise try visiting the city for the cost of distance(current_city, next_city) plus the cost to visit the remaining cities.
 
 This is the bones of the DP solution, but thus far it is not much better than the brute force solution.
 
 Why? Because it is currently lacking memoization.
 
-Consider the following scenarios for a case of 7 cities, 
-A: the salesman visits city 1, 3, 2, 4 
+Consider the following scenarios for a case of 7 cities, <br>
+A: the salesman visits city 1, 3, 2, 4 <br>
 B: the salesman visits city 1, 2, 3, 4 
 
 Journies A and B may have different costs, but the <b>best</b> possible path from city 4 to cities {5, 6, 7} and returning home to city 1 must be the same for both path's A and B.  Once the optimal path from 4 -> {5, 6, 7} -> 1 has been calculated once in scenario A, it would be a duplication of effort to calculate it again for scenario B.
 
-Remembering the minimum cost and best path from the state (current_city, visited_cities) allows us to skip these calculations the second, third, ...Nth time the state is visited.  
+Memoizing the minimum cost and best path from the state (current_city, visited_cities) allows us to skip these calculations the second, third, ...Nth time the state is visited.  
 
-This reduces the time complexity of the solution from O(n!) to O(n<sup>2</sup>&middot;2<sup>n</sup>).
+This reduces the time complexity of the solution from <b>O(n!)</b> to <b>O(n<sup>2</sup>&middot;2<sup>n</sup>).</b><br>
 This is a substantial improvement, which allows us to calculate the optimal solution for up to &approx; 20 cities.
 
 At this point, you might be thinking 20 cities is not a lot of cities, and you are right.
-However, in order to further improve the time complexity of our solution, we must forego accuracy.
+However, in order to further improve the time complexity of our solution, we must forego optimality.
 
-#### <b>The heuristic approach:</b>
+#### <b>Enter the heuristic approach:</b>
 
 1. Calculate the minimum spanning tree (MST) of the set of cities.
 This can be done with Prim's Algorithm or Kruskal's Algorithm.
 Kruskal's Algorithm was implemented here - see TSP_heruistic.py >> heuristic_path
-2. Create a path based on the preorder traversal of the MST.
+2. Create a path based on the order the cities are visited in a preorder traversal of the MST.
 3. Repeat step 2 for all N cities and return the path that has the minimum cost.
 
 The third step is what dominates the time complexity analysis.  Each pre-order terversal is an O(n) operation, and we are preforming the operation once for each city resulting in O(n<sup>2</sup>) time complexity.
@@ -198,9 +198,9 @@ The optimal solution and relaxed heuristic solution agree on the best path every
 
 Since this is a small subset of the total set of nodes, we could apply the dynamic programming solution to find the best path from node (35, 99) to node (5, 83) keeping the two nodes pinned with respect to the remainder of the nodes.  This would require O(k<sup>2</sup>&middot;2<sup>k</sup>) time where k is the length of the gap between nodes.
 
-Furthermore this would need to be applied n times along the path of nodes resulting in O(n&middot;k<sup>2</sup>&middot;2<sup>k</sup>) time complexity.  Which for small k should still be much faster than the dynamic programming approach for the optimal solution.  
+Furthermore because in general we will not know where the heuristic solution deviates from the optimal solution, this needs to be applied n times along the path of nodes - resulting in O(n&middot;k<sup>2</sup>&middot;2<sup>k</sup>) time complexity.  Which for 2&middot;k <= n will still be much faster than the dynamic programming approach for the optimal solution.  
 
-### Visual result of subset optimization:
+### Visual result of k-subset optimization:
 
 <b>Before relaxation (left), After relaxation (middle), After subset optimization (right)</b><br>
 <b>k is the subset size that was optimized.</b>
@@ -233,10 +233,10 @@ Furthermore this would need to be applied n times along the path of nodes result
 ### Comparisons
 
 <b>Approximate path is found through:</b>
-1. Generate MST
-2. Best (lowest cost) pre-order traversal of MST
+1. Calculate MST
+2. Find best (lowest cost) pre-order traversal of MST
 3. Relax points one by one
-4. Replace continuous subsets of k nodes with the optimal arrangement where k is floor(n / 2).
+4. Replace continuous subsets of k nodes with the optimal arrangement where k = n // 2.
 
 | n | (heuristic - optimal) / optimal | | n | (heuristic - optimal) / optimal |
 |:----:|:---:|:---:|:---:|:---:|
@@ -256,8 +256,8 @@ Note: percent error does not necessarily reflect how close the heuristic path is
 |:---:|:---:|:---:|:---:|
 |Brute Force| O(n!)| TLE | 0% |
 |Dynamic Programming |O(n<sup>2</sup> 2<sup>n</sup>)| &approx; 31 sec | 0% |
-|Heuristic Approach | O(n<sup>2</sup>) | &approx; 1 ms | 15%
-|Heuristic Approach with Relaxation | O(n<sup>2</sup>) | &approx; 3 ms | 5% |
-|Heuristic Approach with Relaxation and k-subset Optimization | O(n k<sup>2</sup> 2<sup>k</sup>) | &approx; 500 ms | 0%|
+|Heuristic Approach | O(n<sup>2</sup>) | &approx; 1 ms | 14%
+|Heuristic Approach with Path Relaxation | O(n<sup>2</sup>) | &approx; 3 ms | 5% |
+|Heuristic Approach with Path Relaxation and k-subset Optimization | O(n k<sup>2</sup> 2<sup>k</sup>) | &approx; 500 ms | 0%|
 <i>\*Typical error is based on a set size of 20 vertices.</i><br>
-<i>\*k is set to floor(n / 2) for the k-subset optimization</i>
+<i>\*k is floor(n / 2) for the k-subset optimization</i>
