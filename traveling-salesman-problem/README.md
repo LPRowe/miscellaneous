@@ -265,3 +265,16 @@ Note: percent error does not necessarily reflect how close the heuristic path is
 
 <i>\*Typical error is based on a set size of 20 vertices.</i><br>
 <i>\*k is floor(n / 2) for the k-subset optimization</i>
+
+### Conclusion
+
+Here we explored 5 approaches to solving the traveling salesman problem.<br>
+Two of which are guaranteed to find the optimal solution, at the expense of time and space.
+
+The other three trade off accuracy with speed, ranging from an O(n<sup>2</sup>) solution that on average finds a path 14% longer than the optimal path, to an O(n&middot;k<sup>2</sup>&middot;2<sup>k</sup>) solution that typically finds the optimal path for a set of 20 nodes.  
+
+However which solution is best really depends on your use case.  If you need 100% accuracy, then you have to bite the bullet and use the dynamic programming approach.  And if your problem has thousands of nodes, then you must use some sort of approximation method.  And if you are typically dealing with 15 to 20 nodes, then you can pick an option whose speed and accuracy are ballanced to fit your projects priorities.  
+
+This is an age old problem there are certain to be many approximation methods out there.
+
+To those who are reading this - cheers to you!
