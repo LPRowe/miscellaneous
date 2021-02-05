@@ -262,5 +262,6 @@ Note: percent error does not necessarily reflect how close the heuristic path is
 |Heuristic Approach | O(n<sup>2</sup>) | &approx; 1 ms | 14%
 |Heuristic Approach with Path Relaxation | O(n<sup>2</sup>) | &approx; 3 ms | 5% |
 |Heuristic Approach with Path Relaxation and k-subset Optimization | O(n k<sup>2</sup> 2<sup>k</sup>) | &approx; 500 ms | 0%|
+
 <i>\*Typical error is based on a set size of 20 vertices.</i><br>
 <i>\*k is floor(n / 2) for the k-subset optimization</i>
