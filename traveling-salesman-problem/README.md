@@ -1,7 +1,18 @@
 ### Usage
 
-[ ] List of functions, time complexities, accuracy<br>
-[ ] Note on generalization to non-geometric problems that follow the triangulation inequality by updating the distance function
+<b>traveling_salesman.py</b>
+1. <b>optimal_path</b><br>
+O(n!) Solves TSP optimally for a given list of (x, y) coordinates
+2. <b>optimal_path_dp</b><br>
+O(n<sup>2</sup> 2<sup>n</sup>) Solves TSP optimally
+3. <b>heuristic_path</b><br>
+O(n<sup>2</sup>) Approximate solution typ. 14% longer than optimal path for 20 cities
+4. <b>relaxed_heur_path</b><br>
+O(n<sup>2</sup>) Approximate solution typ. 5% longer than optimal path for 20 cities
+5. <b>k_optimized_path</b><br>
+O(n k<sup>2</sup> 2<sup>k</sup>) Approximate solution typ. 0% longer than optimal path for 20 cities
+
+Note: The above functions can be applied to any list of N-dimensional coordinates that satisfy the triangle inequality theorem by updating the distance function. 
 
 <p align="center">
 <img src="./images/heur-rel-sub/20h5.png" width="32%">
@@ -65,7 +76,7 @@ However, in order to further improve the time complexity of our solution, we mus
 
 1. Calculate the minimum spanning tree (MST) of the set of cities.
 This can be done with Prim's Algorithm or Kruskal's Algorithm.
-Kruskal's Algorithm was implemented here - see TSP_heruistic.py >> heuristic_path
+Kruskal's Algorithm was implemented here - see traveling_salesman.py >> heuristic_path
 2. Create a path based on the order the cities are visited in a preorder traversal of the MST.
 3. Repeat step 2 for all N cities and return the path that has the minimum cost.
 

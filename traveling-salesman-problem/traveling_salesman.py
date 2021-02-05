@@ -26,14 +26,19 @@ Approximate Error:
     3. 0% over optimal path
 """
 
-import random
-import matplotlib
-import matplotlib.pyplot as plt
-import math
+import collections
 import functools
 import heapq
-import collections
+import math
+import random
 import time
+
+import matplotlib
+import matplotlib.pyplot as plt
+
+# =============================================================================
+# CLASSES
+# =============================================================================
 
 class UnionFind:
     def __init__(self):
@@ -75,6 +80,24 @@ class UnionFind:
         self.id[a] = self.id[b] = self.group_id
         self.group_id += 1
         
+# =============================================================================
+# WRAPPERS        
+# =============================================================================
+
+def timer(fcn):
+    """Returns the runtime in ms of the function fcn"""
+    def wrapper(*args, **kwargs):
+        t0 = time.time_ns()
+        res = fcn(*args, **kwargs)
+        t = time.time_ns() - t0
+        print(f"{fcn.__name__}: {round(t * 10**-6, 1)} 'ms'")
+        return res
+    return wrapper
+
+# =============================================================================
+# ACCURACY ASSESSMENT FUNCTIONS
+# =============================================================================
+
 def average_error(func1, func2, n = 12, cycles = 10):
     """
     Compares the path length calculated by func2 and func1. This assumes that func1 produces
@@ -97,7 +120,7 @@ def average_error(func1, func2, n = 12, cycles = 10):
 def average_error2(func1, func2, k, n = 12, cycles = 10):
     """
     Compares the path length calculated by func2 and func1. This assumes that func1 produces
-    the optimal path length and func2 is suboptimized_relaxed_heur_path.
+    the optimal path length and func2 is k_optimized_path.
     
     n: number of nodes
     cycles: how many times to generate a new set of nodes and run func1 and func2
@@ -112,39 +135,10 @@ def average_error2(func1, func2, k, n = 12, cycles = 10):
         best += func1(points)[0]
         heur += func2(points, k)[0]
     print(n, int(best), int(heur), round(100*(heur - best) / best, 3))
-
-def timer(fcn):
-    """Returns the runtime in ms of the function fcn"""
-    def wrapper(*args, **kwargs):
-        t0 = time.time_ns()
-        res = fcn(*args, **kwargs)
-        t = time.time_ns() - t0
-        print(f"{fcn.__name__}: {round(t * 10**-6, 1)} 'ms'")
-        return res
-    return wrapper
-
-def generate_points(n, bound):
-    """
-    Generates a random list of n city positions (xi, yi).
-    n: number of cities
-    bound: maximum allowed X or Y position of any city
-    returns List[(x1, y1), ..., (xn, yn)]
-    """
-    points = set()
-    while len(points) < n:
-        points.add((bound * random.random(), bound * random.random()))
-    return list(points)
-
-def distance(start, fin):
-    """
-    Returns the euclidean distnace between start (x1, y1) and fin (x2, y2).
-    start: (float, float)
-    fin: (float, float)
-    returns float
-    """
-    x1, y1 = start
-    x2, y2 = fin
-    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
+    
+# =============================================================================
+# TSP SOLUTION ALGORITHMS
+# =============================================================================
 
 @timer
 def optimal_path_dp(points):
@@ -184,9 +178,11 @@ def optimal_path_dp(points):
 @timer
 def optimal_path(points):
     """
+    Time complexity: O(n!) For edmonstration purposes only!
+    
     Non-memoized approach to finding the optimal path.
     Takes a list of points and finds the optimal tour to visit all points and return home.
-    Very slow compared to memoized version. For demonstration purposes only. O(n!)
+    Very slow compared to memoized version.
     
     points: List[(x1, y1), ..., (xn, yn)] where xn, yn are floats
     returns cost_of_best_path, best_path where cost_of_best_path is a float and best_path
@@ -212,13 +208,6 @@ def optimal_path(points):
     for i, p in enumerate(points):
         helper(0, [p], points[:i]+points[i+1:])
     return best, best_path
-
-def path_cost(points):
-    """
-    Returns the length of the path that traverses all points.
-    points List[(x1, y1), ..., (xn, yn), (x1, y1)] 
-    """
-    return sum(distance(a, b) for a, b in zip(points, points[1:]))
 
 def path_relaxation(points):
     """
@@ -247,13 +236,13 @@ def path_relaxation(points):
     
     adjusted = set() # keep track of which points have already been adjusted bc order of points may change
     while len(adjusted) < len(points) - 2:
-        for i in range(1, len(points)-1):
+        for i in range(1, len(points) - 1):
             if points[i] not in adjusted:
                 adjusted.add(points[i])
                 rc = reduced_cost(i)   # change in cost by removing point i
                 best = 0
                 best_index = i
-                for j in range(len(points)-1):
+                for j in range(len(points) - 1):
                     if j != i and j != i - 1:
                         c = insertion_cost(points[j], points[i], points[j+1]) # increase in cost by adding point i
                         total_cost = c + rc
@@ -353,7 +342,7 @@ def relaxed_heur_path(points):
     return edges, rel_cost, relaxed_path
 
 @timer
-def suboptimized_relaxed_heur_path(points, k):
+def k_optimized_path(points, k):
     """
     Uses the relaxed heuristic path method to approximate the best TSP path.
     Then optimizes subsets (of size k) of the path
@@ -371,6 +360,7 @@ def suboptimized_relaxed_heur_path(points, k):
     cost, points = partial_tour_optimization(relaxed_path, k)
     return cost, points
 
+@timer
 def partial_tour_optimization(points, k):
     """
     points: list of (x, y) coordinates of the path that visits all nodes
@@ -423,10 +413,14 @@ def partial_tour_optimization(points, k):
     points = points[N:] + [points[N]] # add start point
     
     return path_cost(points), points
-    
+
+# =============================================================================
+# PLOTTING FUNCTIONS
+# =============================================================================
+
 def plot_path(points, color, style = '-', connect_the_dots = True, fig_num = 1, line_width = 1, dot_size = 4):
     """Plots a list of (x, y) coordinates on a scatter plot and connects the path with a line."""
-    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 150)
+    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 300)
     x, y = list(zip(*points))
     plt.scatter(x, y, color = color, s = dot_size)
     if connect_the_dots:
@@ -438,14 +432,12 @@ def plot_edges(edges, color, style = '--', fig_num = 2, line_width = 1):
     plots the minimum spanning tree (MST) for the set of points
     edges: edge_list_of_MST, [(p1, p2), (p1, p3), (p3, p4), ...] where pi is position (xi, yi)
     """
-    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 150)
+    plt.figure(fig_num, figsize = (3.2, 2.4), dpi = 300)
     for a, b in edges:
         plt.scatter([a[0], b[0]], [a[1], b[1]], color = color, s = 4)
         plt.plot([a[0], b[0]], [a[1], b[1]], color + style, lw = line_width)
     plt.show()
-    
 
-    
 def compare(points):
     """
     Takes a list of geometric points [(x1, y1), (x2, y2), ...] and finds the optimal and approxiamte
@@ -454,7 +446,7 @@ def compare(points):
     Three approximations are calculated and compared to the optimal path:
         1. heuristic_path
         2. relaxed_heur_path
-        3. suboptimized_relaxed_heur_path
+        3. k_optimized_path
     """
     cost, best_path = optimal_path_dp(points)
     edges, heur_cost, heur_best_path = heuristic_path(points)
@@ -465,42 +457,78 @@ def compare(points):
         rel_cost, relaxed_path = path_relaxation(relaxed_path)
         
     # show best path vs heuristic path
-    plot_path(best_path, 'g')
-    plot_path(heur_best_path, 'r', style = '--')
+    name = "MST and preorder"
+    plot_path(best_path, 'g', fig_num = name)
+    plot_path(heur_best_path, 'r', style = '--', fig_num = name)
     error = 100 * (heur_cost - cost) / cost
     plt.title(f"Optimal: {round(cost, 1)} Approx.: {round(heur_cost, 1)} Error: {round(error, 1)}%")
     plt.legend(["Optimal Path", "Approximate Path"])
     
     # show mst
-    plot_edges(edges, 'b', style = '-.')
+    name = "MST"
+    plot_edges(edges, 'b', style = '-.', fig_num = name)
     plt.title("Minimum Spanning Tree")
     
     # show best path vs heuristic path with relaxation
-    plot_path(best_path, 'g', fig_num = 3)
-    plot_path(relaxed_path, 'r', style = '--', fig_num = 3)
+    name = "Path Relaxation"
+    plot_path(best_path, 'g', fig_num = name)
+    plot_path(relaxed_path, 'r', style = '--', fig_num = name)
     error = 100 * (rel_cost - cost) / cost
     plt.title(f"Optimal: {round(cost, 1)} Approx.: {round(rel_cost, 1)} Error: {round(error, 1)}%")
     plt.legend(["Optimal Path", "Approximate Path"])
     
     # Perform relaxation and subpath optimization
-    subopt_cost, sub_path = partial_tour_optimization(relaxed_path, n // 2)
-    plot_path(best_path, 'g', fig_num = 4)
-    plot_path(sub_path, 'r', style = '--', fig_num = 4)
-    error = 100 * (subopt_cost - cost) / cost
-    plt.title(f"Optimal: {round(cost, 1)} Approx.: {round(subopt_cost, 1)} Error: {round(error, 1)}%")
+    name = "k-Optimization"
+    k_opt_cost, sub_path = partial_tour_optimization(relaxed_path, n // 2)
+    plot_path(best_path, 'g', fig_num = name)
+    plot_path(sub_path, 'r', style = '--', fig_num = name)
+    error = 100 * (k_opt_cost - cost) / cost
+    plt.title(f"Optimal: {round(cost, 1)} Approx.: {round(k_opt_cost, 1)} Error: {round(error, 1)}%")
     plt.legend(["Optimal Path", "Approximate Path"])
     
     print(f"heuristic cost: {int(heur_cost)}",
           f"relaxed cost: {int(rel_cost)}",
-          f"k-optimized: cost {int(subopt_cost)}", 
+          f"k-optimized: cost {int(k_opt_cost)}", 
           f"optimal cost: {int(cost)}", sep='\n')
     
+# =============================================================================
+# HELPER FUNCTIONS
+# =============================================================================
+    
+def distance(start, fin):
+    """
+    Returns the euclidean distnace between start (x1, y1) and fin (x2, y2).
+    start: (float, float)
+    fin: (float, float)
+    returns float
+    """
+    x1, y1 = start
+    x2, y2 = fin
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
+
+def generate_points(n, bound):
+    """
+    Generates a random list of n city positions (xi, yi).
+    n: number of cities
+    bound: maximum allowed X or Y position of any city
+    returns List[(x1, y1), ..., (xn, yn)]
+    """
+    points = set()
+    while len(points) < n:
+        points.add((bound * random.random(), bound * random.random()))
+    return list(points)
+    
+def path_cost(points):
+    """
+    Returns the length of the path that traverses all points.
+    points List[(x1, y1), ..., (xn, yn), (x1, y1)] 
+    """
+    return sum(distance(a, b) for a, b in zip(points, points[1:]))
+
 if __name__ == "__main__":
     plt.close('all')
     matplotlib.rc('font', size = 7)
-    n = 20
-    points = generate_points(n, 100)
-    compare(points)
-    #average_error2(optimal_path_dp, suboptimized_relaxed_heur_path, k = n // 2, n = n, cycles = 50)
-        
-        
+    n = 17          # number of cities in the Traveling Salesman Problem
+    bound = 100     # cities locations randomly generated in (x, y) = ([0, bound], [0, bound])
+    points = generate_points(n, bound)
+    compare(points) # compare the 3 approxiamte solutions to the optimal solution
