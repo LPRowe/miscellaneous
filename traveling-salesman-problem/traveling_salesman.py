@@ -1,6 +1,9 @@
+"""LICENSE
+This source code is licensed under the MIT-style license found in the
+LICENSE file in the root directory of this source tree. 
 """
-Rowe 02/04/2021
 
+"""INTRO
 The traveling salesman problem (TSP) requires a salesman to visit
 all n vertices (nodes) and return to the starting node taking the
 shortest possible path.  
@@ -16,9 +19,10 @@ Here we will solve the TSP optimally and using a 3 heuristics, each one
 improving on it's predecessor.  
 
 Summary:
-    1. O(n**2) MST and preorder traversal of points
-    2. O(n**2) relax points from solution (1)
-    3. O(n k**2 2**k) where k = n // 2 optimize continuous paths of k nodes from solution (2)
+    1. heuristic_path    O(n**2) MST and preorder traversal of points
+    2. relaxed_heur_path O(n**2) relax points from heuristic_path solution
+    3. k_optimized_path  O(n k**2 2**k) where k = n // 2 
+       optimize continuous subpaths of k nodes from relaxed_heur_path solution
 
 Approximate Error:
     1. 14% over optimal path
@@ -37,7 +41,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 # =============================================================================
-# CLASSES
+# CUSTOM CLASSES
 # =============================================================================
 
 class UnionFind:
@@ -81,7 +85,7 @@ class UnionFind:
         self.group_id += 1
         
 # =============================================================================
-# WRAPPERS        
+# CUSTOM WRAPPERS        
 # =============================================================================
 
 def timer(fcn):
@@ -95,49 +99,41 @@ def timer(fcn):
     return wrapper
 
 # =============================================================================
-# ACCURACY ASSESSMENT FUNCTIONS
+# HELPER FUNCTIONS
 # =============================================================================
+    
+def distance(start, fin):
+    """
+    Returns the euclidean distnace between start (x1, y1) and fin (x2, y2).
+    start: (float, float)
+    fin: (float, float)
+    returns float
+    """
+    x1, y1 = start
+    x2, y2 = fin
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-def average_error(func1, func2, n = 12, cycles = 10):
+def generate_points(n, bound):
     """
-    Compares the path length calculated by func2 and func1. This assumes that func1 produces
-    the optimal path length and func2 is heuristic_path or relaxed_heur_path.
-    
-    n: number of nodes
-    cycles: how many times to generate a new set of nodes and run func1 and func2
-    
-    returns None
-    prints (sum of optimal path lengths, sum of approx path lengths, overestimate percentage)
+    Generates a random list of n city positions (xi, yi).
+    n: number of cities
+    bound: maximum allowed X or Y position of any city
+    returns List[(x1, y1), ..., (xn, yn)]
     """
-    best = heur = 0
-    for i in range(cycles):
-        print(i, '/', cycles)
-        points = generate_points(n, 100)
-        best += func1(points)[0]
-        heur += func2(points)[1]
-    print(round(best, 1), round(heur, 1), round(100*(heur - best) / best, 2))
+    points = set()
+    while len(points) < n:
+        points.add((bound * random.random(), bound * random.random()))
+    return list(points)
     
-def average_error2(func1, func2, k, n = 12, cycles = 10):
+def path_cost(points):
     """
-    Compares the path length calculated by func2 and func1. This assumes that func1 produces
-    the optimal path length and func2 is k_optimized_path.
-    
-    n: number of nodes
-    cycles: how many times to generate a new set of nodes and run func1 and func2
-    
-    returns None
-    prints (sum of optimal path lengths, sum of approx path lengths, overestimate percentage)
+    Returns the length of the path that traverses all points.
+    points List[(x1, y1), ..., (xn, yn), (x1, y1)] 
     """
-    best = heur = 0
-    for i in range(cycles):
-        print(i, '/', cycles)
-        points = generate_points(n, 100)
-        best += func1(points)[0]
-        heur += func2(points, k)[0]
-    print(n, int(best), int(heur), round(100*(heur - best) / best, 3))
-    
+    return sum(distance(a, b) for a, b in zip(points, points[1:]))
+
 # =============================================================================
-# TSP SOLUTION ALGORITHMS
+# TRAVELING SALESMAN OPTIMAL SOLUTION ALGORITHMS
 # =============================================================================
 
 @timer
@@ -209,57 +205,9 @@ def optimal_path(points):
         helper(0, [p], points[:i]+points[i+1:])
     return best, best_path
 
-def path_relaxation(points):
-    """
-    points: the tour suggested by heuristic_path List[(x1, y1), ..., (xn, yn), (x1, y1)]
-    
-    note: points[0] = points[-1] = the starting city, never move points[0] or points[-1]
-    
-    Tries removing one node from the path and tries to insert it between all other
-    cities.  The location that results in the smallest total path is chosen.
-    This process is repeated for all n nodes. (consider prioritizing the order of checking nodes)
-    i.e. do most streched node first
-    
-    returns cost_of_path, List[(x1, y1), ..., (xn, yn), (x1, y1)]
-    """
-    
-    def reduced_cost(i):
-        """returns the change in path length when point i is removed from the path
-        reduced_cost should always be <= 0 when triangulation inequality is true (it is for geometric points)"""
-        a, b, c = points[i-1], points[i], points[i+1]
-        return distance(a, c) - distance(a, b) - distance(b, c)
-    
-    def insertion_cost(a, b, c):
-        """returns the cost of inserting point b in between points a and c
-        insertion_cost should always be >= 0 when triangulation inequality is true (it is for geometric points)"""
-        return distance(a, b) + distance(b, c) - distance(a, c)
-    
-    adjusted = set() # keep track of which points have already been adjusted bc order of points may change
-    while len(adjusted) < len(points) - 2:
-        for i in range(1, len(points) - 1):
-            if points[i] not in adjusted:
-                adjusted.add(points[i])
-                rc = reduced_cost(i)   # change in cost by removing point i
-                best = 0
-                best_index = i
-                for j in range(len(points) - 1):
-                    if j != i and j != i - 1:
-                        c = insertion_cost(points[j], points[i], points[j+1]) # increase in cost by adding point i
-                        total_cost = c + rc
-                        if total_cost < best:
-                            best = total_cost
-                            best_index = j
-                
-                # update the order in which points[i] is visited if a lower cost order was found
-                if best < 0 and best_index != i:
-                    j = best_index
-                    p = [points[i]]
-                    if j < i:
-                        points = points[:j+1] + p + points[j+1:i] + points[i+1:]
-                    else:
-                        points = points[:i] + points[i+1:j+1] + p + points[j+1:]
-
-    return path_cost(points), points
+# =============================================================================
+# TRAVELING SALESMAN HEURISTIC SOLUTION ALGORITHMS
+# =============================================================================
 
 @timer
 def heuristic_path(points):
@@ -323,6 +271,58 @@ def heuristic_path(points):
             best_path = path
     
     return edges, best, best_path
+
+def path_relaxation(points):
+    """
+    points: the tour suggested by heuristic_path List[(x1, y1), ..., (xn, yn), (x1, y1)]
+    
+    note: points[0] = points[-1] = the starting city, never move points[0] or points[-1]
+    
+    Tries removing one node from the path and tries to insert it between all other
+    cities.  The location that results in the smallest total path is chosen.
+    This process is repeated for all n nodes. (consider prioritizing the order of checking nodes)
+    i.e. do most streched node first
+    
+    returns cost_of_path, List[(x1, y1), ..., (xn, yn), (x1, y1)]
+    """
+    
+    def reduced_cost(i):
+        """returns the change in path length when point i is removed from the path
+        reduced_cost should always be <= 0 when triangulation inequality is true (it is for geometric points)"""
+        a, b, c = points[i-1], points[i], points[i+1]
+        return distance(a, c) - distance(a, b) - distance(b, c)
+    
+    def insertion_cost(a, b, c):
+        """returns the cost of inserting point b in between points a and c
+        insertion_cost should always be >= 0 when triangulation inequality is true (it is for geometric points)"""
+        return distance(a, b) + distance(b, c) - distance(a, c)
+    
+    adjusted = set() # keep track of which points have already been adjusted bc order of points may change
+    while len(adjusted) < len(points) - 2:
+        for i in range(1, len(points) - 1):
+            if points[i] not in adjusted:
+                adjusted.add(points[i])
+                rc = reduced_cost(i)   # change in cost by removing point i
+                best = 0
+                best_index = i
+                for j in range(len(points) - 1):
+                    if j != i and j != i - 1:
+                        c = insertion_cost(points[j], points[i], points[j+1]) # increase in cost by adding point i
+                        total_cost = c + rc
+                        if total_cost < best:
+                            best = total_cost
+                            best_index = j
+                
+                # update the order in which points[i] is visited if a lower cost order was found
+                if best < 0 and best_index != i:
+                    j = best_index
+                    p = [points[i]]
+                    if j < i:
+                        points = points[:j+1] + p + points[j+1:i] + points[i+1:]
+                    else:
+                        points = points[:i] + points[i+1:j+1] + p + points[j+1:]
+
+    return path_cost(points), points
 
 @timer
 def relaxed_heur_path(points):
@@ -415,6 +415,48 @@ def partial_tour_optimization(points, k):
     return path_cost(points), points
 
 # =============================================================================
+# ACCURACY ASSESSMENT FUNCTIONS
+# =============================================================================
+
+def average_error(func1, func2, n = 12, cycles = 10):
+    """
+    Compares the path length calculated by func2 and func1. This assumes that func1 produces
+    the optimal path length and func2 is heuristic_path or relaxed_heur_path.
+    
+    n: number of nodes
+    cycles: how many times to generate a new set of nodes and run func1 and func2
+    
+    returns None
+    prints (sum of optimal path lengths, sum of approx path lengths, overestimate percentage)
+    """
+    best = heur = 0
+    for i in range(cycles):
+        print(i, '/', cycles)
+        points = generate_points(n, 100)
+        best += func1(points)[0]
+        heur += func2(points)[1]
+    print(round(best, 1), round(heur, 1), round(100*(heur - best) / best, 2))
+    
+def average_error2(func1, func2, k, n = 12, cycles = 10):
+    """
+    Compares the path length calculated by func2 and func1. This assumes that func1 produces
+    the optimal path length and func2 is k_optimized_path.
+    
+    n: number of nodes
+    cycles: how many times to generate a new set of nodes and run func1 and func2
+    
+    returns None
+    prints (sum of optimal path lengths, sum of approx path lengths, overestimate percentage)
+    """
+    best = heur = 0
+    for i in range(cycles):
+        print(i, '/', cycles)
+        points = generate_points(n, 100)
+        best += func1(points)[0]
+        heur += func2(points, k)[0]
+    print(n, int(best), int(heur), round(100*(heur - best) / best, 3))
+
+# =============================================================================
 # PLOTTING FUNCTIONS
 # =============================================================================
 
@@ -491,40 +533,6 @@ def compare(points):
           f"k-optimized: cost {int(k_opt_cost)}", 
           f"optimal cost: {int(cost)}", sep='\n')
     
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
-    
-def distance(start, fin):
-    """
-    Returns the euclidean distnace between start (x1, y1) and fin (x2, y2).
-    start: (float, float)
-    fin: (float, float)
-    returns float
-    """
-    x1, y1 = start
-    x2, y2 = fin
-    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
-
-def generate_points(n, bound):
-    """
-    Generates a random list of n city positions (xi, yi).
-    n: number of cities
-    bound: maximum allowed X or Y position of any city
-    returns List[(x1, y1), ..., (xn, yn)]
-    """
-    points = set()
-    while len(points) < n:
-        points.add((bound * random.random(), bound * random.random()))
-    return list(points)
-    
-def path_cost(points):
-    """
-    Returns the length of the path that traverses all points.
-    points List[(x1, y1), ..., (xn, yn), (x1, y1)] 
-    """
-    return sum(distance(a, b) for a, b in zip(points, points[1:]))
-
 if __name__ == "__main__":
     plt.close('all')
     matplotlib.rc('font', size = 7)
