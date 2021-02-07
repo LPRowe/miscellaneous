@@ -72,19 +72,18 @@ An array is selected instead of a hash table or a set because we know the exact 
     
     </details>
     
-    <br>
 4. Iterate over all solutions of list lenght 1 (all the pyramidal numbers) and for each number try adding all pyramidal numbers that are less than or equal to it to create a new number, the sum of 2 pyramidal numbers.  We iterate over i [p0, p1, ..., pP] on the outer loop and j [p0, p1, ..., pi] on the inner loop to avoid duplicating effort.  i.e. we avoid considering p15 + p500 and then p500 + p15 later on.  This reduces our operations from P<sup>2</sup> to P&middot;(P - 1) / 2<br><br>
 
-5. For each x where memo[x] is of length 2, try adding all P to x to find a length 3 solution memo[x+pi] = memo[x] + [pi].  This is the crux of the SOLVE_ALL solution as it requires P&middot;X<sub>2</sub> operations before pruning where X<sub>2</sub> is the number of solutions of length 2.  <br><br>
-
-<details>
-
-<summary>Thought Process: (click to show)</summary>
-
-Here we have another choice.  Our next challenge is to calculate the solution for x values where memo[x] is of length 4. We could continue the current pattern iterating over P&middot;X<sub>3</sub> which will find all x where memo[x] is length 4.  However, roughly 44% of values from [1, N] belong to X<sub>3</sub> and as a result there are a lot of length 4 solutoins that have overlapping lenght 3 + 1 solutions.  A more efficient approach is actually to reuse our X<sub>2</sub> solutions in the same way that we used X<sub>1</sub> solutions to find X<sub>2</sub> solutions.  This requires X<sub>2</sub>&middot;(X<sub>2</sub> - 1) / 2 operations which after pruning turns out to be roughly 10 times faster than using X<sub>3</sub> and X<sub>1</sub> to find X<sub>4</sub>  for N = 10<sup>7</sup>.  This factor becomes greater with increasing N.  
-
-</details>
-
+5. For each x where memo[x] is of length 2, try adding all P to x to find a length 3 solution memo[x+pi] = memo[x] + [pi].  This is the crux of the SOLVE_ALL solution as it requires P&middot;X<sub>2</sub> operations before pruning where X<sub>2</sub> is the number of solutions of length 2.  <br>
+    
+    <details>
+    
+    <summary>Thought Process: (click to show)</summary>
+    
+    Here we have another choice.  Our next challenge is to calculate the solution for x values where memo[x] is of length 4. We could continue the current pattern     iterating over P&middot;X<sub>3</sub> which will find all x where memo[x] is length 4.  However, roughly 44% of values from [1, N] belong to X<sub>3</sub> and as     a result there are a lot of length 4 solutoins that have overlapping lenght 3 + 1 solutions.  A more efficient approach is actually to reuse our X<sub>2</sub>     solutions in the same way that we used X<sub>1</sub> solutions to find X<sub>2</sub> solutions.  This requires X<sub>2</sub>&middot;(X<sub>2</sub> - 1) / 2     operations which after pruning turns out to be roughly 10 times faster than using X<sub>3</sub> and X<sub>1</sub> to find X<sub>4</sub>  for N = 10<sup>7</sup>.      This factor becomes greater with increasing N.  
+    
+    </details>
+    
 6. Finally all that is left to find are the numbers that were missed by step 5 and belong to X<sub>4</sub> and the numbers that belong to X<sub>5</sub>.  This is a small fraction of the total numbers, so it will be quickest to iterate over the x values that do not yet have a solution, and for each x value, iterate over all pi less than x to see if x - pi belongs to X<sub>3</sub> or X<sub>4</sub>.  
 
 
