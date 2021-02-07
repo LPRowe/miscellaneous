@@ -59,7 +59,7 @@ An array is selected instead of a hash table or a set because we know the exact 
     The first option would require P&middot;(N - P) operations before pruning, the latter requires P<sup>2</sup> operations before pruning.  Since N is much greater     than P, the latter option is the smarter way to go.<br><br>
     
     </details>
-    <br>
+    
     <details>
     
     <summary>Notes on pruning: (click to show)</summary>
