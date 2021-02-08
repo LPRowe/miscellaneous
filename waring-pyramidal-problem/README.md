@@ -83,8 +83,10 @@ An array is selected instead of a hash table or a set because we know the exact 
     Here we have another choice.  Our next challenge is to calculate the solution for x values where memo[x] is of length 4. We could continue the current pattern     iterating over P&middot;X<sub>3</sub> which will find all x where memo[x] is length 4.  However, roughly 44% of values from [1, N] belong to X<sub>3</sub> and as     a result there are a lot of length 4 solutoins that have overlapping lenght 3 + 1 solutions.  A more efficient approach is actually to reuse our X<sub>2</sub>     solutions in the same way that we used X<sub>1</sub> solutions to find X<sub>2</sub> solutions.  This requires X<sub>2</sub>&middot;(X<sub>2</sub> - 1) / 2     operations which after pruning turns out to be roughly 10 times faster than using X<sub>3</sub> and X<sub>1</sub> to find X<sub>4</sub>  for N = 10<sup>7</sup>.      This factor becomes greater with increasing N.  
     
     </details>
-    
-6. Finally all that is left to find are the numbers that were missed by step 5 and belong to X<sub>4</sub> and the numbers that belong to X<sub>5</sub>.  This is a small fraction of the total numbers, so it will be quickest to iterate over the x values that do not yet have a solution, and for each x value, iterate over all pi less than x to see if x - pi belongs to X<sub>3</sub> or X<sub>4</sub>.  
+ 
+6. Find the x values that have a length 4 solution (X<sub>4</sub>) by combining two values from the group X<sub>2</sub>.  Iterate over i from [0, |X<sub>2</sub>|] and j from [0, i] and break early when X<sub>2</sub>[i] + X<sub>2</sub>[j] > N.<br><br>
+ 
+7. Finally all that is left to find are the numbers that were missed by step 5 and belong to X<sub>4</sub> and the numbers that belong to X<sub>5</sub>.  This is a small fraction of the total numbers, so it will be quickest to iterate over the x values that do not yet have a solution, and for each x value, iterate over all pi less than x to see if x - pi belongs to X<sub>3</sub> or X<sub>4</sub>.  
 
 
 ### SOLVE_RANGE Details:
