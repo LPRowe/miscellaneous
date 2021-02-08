@@ -12,10 +12,10 @@ Skiena uses this story as a segue to discuss how wisely selecting an efficient a
 ### Nomenclature:
 
 N: the maximum number for which to find a solution<br>
-pi: the i<sup>th</sup> pyramidal number<br>
+p<sub>i</sub>: the i<sup>th</sup> pyramidal number<br>
 P: the number of pyramidal numbers less than or equal to N<br>
 x: an integer in [1, N]<br>
-X<sub>i</sub>: an group of x values where each x has a solution x = p1 + p2 + ... + pi where i <= 5<br>
+X<sub>i</sub>: an group of x values where each x has a solution x = p1 + p2 + ... + p<sub>i</sub> where i <= 5<br>
 
 
 ### Settings:
@@ -72,9 +72,9 @@ An array is selected instead of a hash table or a set because we know the exact 
     
     </details>
     
-4. Iterate over all solutions of list lenght 1 (all the pyramidal numbers) and for each number try adding all pyramidal numbers that are less than or equal to it to create a new number, the sum of 2 pyramidal numbers.  We iterate over i [p0, p1, ..., pP] on the outer loop and j [p0, p1, ..., pi] on the inner loop to avoid duplicating effort.  i.e. we avoid considering p15 + p500 and then p500 + p15 later on.  This reduces our operations from P<sup>2</sup> to P&middot;(P - 1) / 2<br><br>
+4. Iterate over all solutions of list lenght 1 (all the pyramidal numbers) and for each number try adding all pyramidal numbers that are less than or equal to it to create a new number, the sum of 2 pyramidal numbers.  We iterate over i [p0, p1, ..., p<sub>P</sub>] on the outer loop and j [p0, p1, ..., p<sub>i</sub>] on the inner loop to avoid duplicating effort.  i.e. we avoid considering p15 + p500 and then p500 + p15 later on.  This reduces our operations from P<sup>2</sup> to P&middot;(P - 1) / 2<br><br>
 
-5. For each x where memo[x] is of length 2, try adding all P to x to find a length 3 solution memo[x+pi] = memo[x] + [pi].  This is the crux of the SOLVE_ALL solution as it requires P&middot;X<sub>2</sub> operations before pruning where X<sub>2</sub> is the number of solutions of length 2.  <br>
+5. For each x where memo[x] is of length 2, try adding all P to x to find a length 3 solution memo[x+p<sub>i</sub>] = memo[x] + [p<sub>i</sub>].  This is the crux of the SOLVE_ALL solution as it requires P&middot;X<sub>2</sub> operations before pruning where X<sub>2</sub> is the number of solutions of length 2.  <br>
     
     <details>
     
@@ -86,7 +86,7 @@ An array is selected instead of a hash table or a set because we know the exact 
  
 6. Find the x values that have a length 4 solution (X<sub>4</sub>) by combining two values from the group X<sub>2</sub>.  Iterate over i from [0, |X<sub>2</sub>|] and j from [0, i] and break early when X<sub>2</sub>[i] + X<sub>2</sub>[j] > N.<br><br>
  
-7. Finally all that is left to find are the numbers that were missed by step 5 and belong to X<sub>4</sub> and the numbers that belong to X<sub>5</sub>.  This is a small fraction of the total numbers, so it will be quickest to iterate over the x values that do not yet have a solution, and for each x value, iterate over all pi less than x to see if x - pi belongs to X<sub>3</sub> or X<sub>4</sub>.  
+7. Finally all that is left to find are the numbers that were missed by step 5 and belong to X<sub>4</sub> and the numbers that belong to X<sub>5</sub>.  This is a small fraction of the total numbers, so it will be quickest to iterate over the x values that do not yet have a solution, and for each x value, iterate over all p<sub>i</sub> less than x to see if x - p<sub>i</sub> belongs to X<sub>3</sub> or X<sub>4</sub>.  
 
 
 ### SOLVE_RANGE Details:
@@ -101,7 +101,7 @@ start + size is the largest x we want to sovle for.<br><br>
 
 2. Recursively solve for each x.<br>
 Start by checking if x is a pyramidal number.<br>
-Otherwise try subtracting the largest pyramidal number pi from x where pi < x and adding pi to the path.<br>
+Otherwise try subtracting the largest pyramidal number p<sub>i</sub> from x where p<sub>i</sub> < x and adding p<sub>i</sub> to the path.<br>
 Repeat until x is a pyramidal number, then the solution is path + [x].<br><br>
 
 <b>Optimizations</b>: 
@@ -113,7 +113,7 @@ Repeat until x is a pyramidal number, then the solution is path + [x].<br><br>
 
 Output:<br>
 function_name: runtime in milliseconds<br>
-x followed by a list of pi values that sum to x<br>
+x followed by a list of pyramidal numbers that sum to x<br>
 
 SOLVE_RANGE = True<br>
 START = 10<sup>12</sup><br>
