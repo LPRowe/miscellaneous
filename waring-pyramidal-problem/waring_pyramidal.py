@@ -217,6 +217,7 @@ def solve_single(x):
     return res
     
 if __name__ == "__main__":
+    # SETTINGS
     SOLVE_ALL = False       # Find solutions for x in range [1, N]
     SAVE = False            # Save solutions in the format x,p1,p2,p3,p4,p5
     N = 10**6
@@ -225,7 +226,7 @@ if __name__ == "__main__":
     A, B = 1, 7             # Plots runtimes for N = [10**a, ..., 10**b] inclusive
     
     SOLVE_RANGE = True      # Find solutions for x in range [a, b] where 1 <= a <= b <= N
-    START, SIZE = 10**20, 5 # sove for range [START, START + SIZE]
+    START, SIZE = 10**9, 10 # sove for range [START, START + SIZE]
     
     if SOLVE_ALL:
         nums = pyramidal_nums(N)                    # All pyramidal numbers in the range [1, N]
