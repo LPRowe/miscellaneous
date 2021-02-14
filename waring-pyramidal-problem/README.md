@@ -1,13 +1,13 @@
 ## Waring's Problem with Pyramidal Numbers
 
-This problem is a spin-off of <a href="https://en.wikipedia.org/wiki/Waring%27s_problem">Waring's problem</a>, an example of which asks if every natural number can be represented by the sum of four squares.  <br><br>
+This repository seeks to address a variant of <a href="https://en.wikipedia.org/wiki/Waring%27s_problem">Waring's problem</a>.<br><br>
 
-<b>Problem Statement:</b> For every natural number x in the range 1 to 10<sup>9</sup>, find a combination of 5 or less pyramidal numbers that sum to x.  <br>
-i.e. 424 is the sum of (35, 56, 84, 84, 165); pyramidal numbers follow (n<sup>3</sup> - n) / 6 for n >= 2.<br><br>
+<b>Goal:</b> For every natural number x in the range 1 to 10<sup>9</sup>, find a combination of 5 or less pyramidal numbers that sum to x.  <br><br>
+i.e. 424 is the sum of (4, 56, 364); pyramidal numbers follow (n<sup>3</sup> - n) / 6 for n >= 2.<br><br>
 
-The problem was plucked from one of the many "war stories" - real life programming challenges -  shared by Prof. Skiena in "The Algorithm Design Manual."<br><br>
+This challenge was inspired by one of the many programming "war stories" shared by Prof. Skiena in "The Algorithm Design Manual."<br><br>
 
-Skiena uses this story as a segue to discuss how wisely selecting an efficient algorithm can be much more beneficial than implementing parallel programming and to caution the reader about calculating the best way to balance the load before starting a time intensive program on a cluster. It was both an informative and entertaining read.<br><br>
+Skiena uses this story as a segue to discuss how wisely selecting an efficient algorithm can be more beneficial than raw computing power and implementing parallel programming.  This story also serves to caution the reader about the importance of calculating the best way to balance the load before starting a time intensive program on a cluster. It was both an informative and entertaining read.<br><br>
 
 ### Nomenclature:
 
