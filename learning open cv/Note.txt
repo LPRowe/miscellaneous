@@ -1,0 +1,1 @@
+open-cv-course-master: https://github.com/jasmcaus/opencv-course
